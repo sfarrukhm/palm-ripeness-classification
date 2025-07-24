@@ -10,23 +10,32 @@ def count_images(path, title):
     df.loc[len(df.index)] = [folder, len(files)]
   return df
 
+import os
+import glob as gb
+import matplotlib.pyplot as plt
+import pandas as pd
+from tqdm import tqdm
+
 def get_image_size(path, is_pred=False):
     """
     Arguments:
         path: where images are stored
+        is_pred: if True, look in root only
     """
-  size = []
+    size = []
 
-  if is_pred:
-    folders = [""]
-  else:
-    folders = os.listdir(path)
+    if is_pred:
+        folders = [""]
+    else:
+        folders = os.listdir(path)
 
-  for folder in tqdm(folders):
-    for img in gb.glob(pathname= path + folder + "/*.jpg"):
-      image = plt.imread(img)
-      size.append(image.shape)
-  return pd.Series(size).value_counts()
+    for folder in tqdm(folders):
+        for img in gb.glob(os.path.join(path, folder, "*.jpg")):
+            image = plt.imread(img)
+            size.append(image.shape)
+    
+    return pd.Series(size).value_counts()
+
 
 def visualize_image_samples(data, title, figsize=(16, 6), rows_cols=(3, 10), is_pred=False):
     """
