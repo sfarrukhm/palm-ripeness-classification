@@ -5,15 +5,28 @@ import pandas as pd
 from tqdm import tqdm
 
 
+import os
+import glob as gb
+import pandas as pd
+
 def count_images(path, title): 
     df = pd.DataFrame(columns=[f"{title}_Class", "Count"])
     
     for folder in os.listdir(path):
         folder_path = os.path.join(path, folder)
-        files = gb.glob(os.path.join(folder_path, "*.jpg"))
-        df.loc[len(df.index)] = [folder, len(files)]
+        
+        # Confirm folder is actually a directory
+        if not os.path.isdir(folder_path):
+            continue
+
+        # Glob for .jpg (case-insensitive match)
+        image_files = gb.glob(os.path.join(folder_path, "*.jpg"))
+        image_files += gb.glob(os.path.join(folder_path, "*.JPG"))
+
+        df.loc[len(df.index)] = [folder, len(image_files)]
     
     return df
+
 
 
 def get_image_size(path, is_pred=False):
