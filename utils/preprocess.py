@@ -1,0 +1,55 @@
+import pandas as pd
+import os
+import glob as gb
+import matplotlib.pyplot as plt
+
+def count_images(path, title):
+  df = pd.DataFrame(columns=[f"{title}_Class", "Count"])
+  for folder in os.listdir(path):
+    files = gb.glob(pathname= path + folder + "/*.jpg")
+    df.loc[len(df.index)] = [folder, len(files)]
+  return df
+
+def get_image_size(path, is_pred=False):
+    """
+    Arguments:
+        path: where images are stored
+    """
+  size = []
+
+  if is_pred:
+    folders = [""]
+  else:
+    folders = os.listdir(path)
+
+  for folder in tqdm(folders):
+    for img in gb.glob(pathname= path + folder + "/*.jpg"):
+      image = plt.imread(img)
+      size.append(image.shape)
+  return pd.Series(size).value_counts()
+
+def visualize_image_samples(data, title, figsize=(16, 6), rows_cols=(3, 10), is_pred=False):
+    """
+    Arguemnts:
+        data: torch dataset
+    """
+    
+  plt.figure(figsize=(figsize))
+  rows, cols = rows_cols
+  plt.suptitle(title, fontsize=16, fontweight='bold')
+
+  for i in range(1, rows * cols + 1):
+    plt.subplot(rows, cols, i)
+    random_idx = int(torch.randint(0, len(data), size=[1]).item())
+
+    if is_pred:
+      image = data[random_idx]
+    else:
+      image, label = data[random_idx]
+      plt.title(class_names[label].title(),fontdict={"color":"blue", "fontsize":12})
+
+    plt.imshow(image.permute(1, 2, 0))
+    plt.axis('off')
+
+  plt.tight_layout()
+  plt.show()
